@@ -18,11 +18,7 @@
 			}	
 			stage('Docker Build and Push'){
 				steps{
-				before_script:
-  					- df
-  					- cat /etc/resolv.conf
- 					 - cat /etc/hosts
-
+	
         			script {	
 						withDockerRegistry([credentialsId: "jfrog credential", url: 'http://18.215.151.55:8081/artifactory']) {
 			
