@@ -22,10 +22,10 @@
 						withDockerRegistry([credentialsId: "jfrog credential", url: 'http://18.215.151.55:8081/artifactory']) {
 			
 				echo "build"
-				sh "docker build -t ${registryUrl}:${git_commit_hash} ."
+				sh "docker build -t testweb ."
 
 				echo "push"
-				sh "docker push ${registryUrl}:${git_commit_hash}"
+				sh "docker push testweb"
 						  }
 						}
 					  }
