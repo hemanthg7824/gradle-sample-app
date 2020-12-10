@@ -36,7 +36,7 @@
 	//				echo "Deploy"
 	//				sh "ansible-playbook ${Workspace}/${image}/ansible/deploy.yaml --extra-vars registryUrl=${registryUrl} --extra-vars git_commit_hash=${git_commit_hash}"
 	//				}
-				}
+	//			}
 
 }
 }
