@@ -1,82 +1,42 @@
-pipeline	{
-	stages{
-		stage('Build')	{
-			steps {
-			 script {
-			  dir("test")
-			  {
-			  sh 'touch $WORKSPACE/Aritifact_$BUILD_NUMBER'
-			  }
-			  }
-			 }
-			}
+  def Workspace = "/var/jenkins_home"
+  //def Creds = "aws-id"
+  //def region = "ap-south-1"
+  def image = "kl-uaa-service"
+  def registryUrl = "146776836293.dkr.ecr.ap-south-1.amazonaws.com/${image}"	
+	pipeline {
+		agent any
+		environment {
+		git_commit_hash = sh(script: 'git describe --tags --always', returnStdout: true).trim()
+		}
+   		stages {
+			stage('Git Checkout') {
+				steps {
+					git branch: 'master',
+	//					credentialsId: 'Gitlab-pvtkey',
+							url: 'https://github.com/hemanthg7824/gradle-sample-app.git'
+					}
+			}	
+			stage('Docker Build and Push'){
+				steps{
+        			script {	
+	//					withDockerRegistry([credentialsId: "jfrog credential", url: 'http://18.215.151.55:8081/artifactory']) {
 			
-		stage ('upload') {
-			steps {
-			 	rtupload (
-				buildName: JOB_NAME,
-				buildNumber:	BUILD_NMBER,
-				serverId: SERVER_ID,
-				spec: '''{
-         			 "files": [
-            			{
-            			  "pattern": "/root/.jenkins/workspace/test02/*.war",
-            			  "target": "Generic-demo-local/"
-						  "recursive": "false"
-            }
-         ]
-    }'''
-	)
-	}
-	}
-	  	stage('publish build info'
-			steps {
-			rtPublishBuildInfo (
-				serverId: 'SERVER_ID,
-		    	buildName: 'JOB_NAME',
-    			buildNumber: 'BUILD_NUMBER'
-			)
-			}
-			)
-		stage ('Add interative promotion'){
-		 steps {
-		 	rtAddIneractivePromotion (
-			serverId: SERVER_ID,
-			targetRepo: 'Generic-demo-local/',
-			displayName: 'Promote',
-			buildName: 'JOB_NAME',
-    		buildNumber: 'BUILD_NUMBER',
-		    comment: 'test',
-			sourceRepo: 'Generic-demo-local/',
-			status: 'Released',
-			inldeDependencies: true,
-			failFast: true,
-			copy: true
-			)
-			
-			}
-			}
-			
-			stage ('Removing files'){
-			steps {
-			 	sh 'rm -rf $WORKSPACE/*'
+				echo "build"
+				sh "docker build -t ${registryUrl}:${git_commit_hash} ."
+
+				echo "push"
+				sh "docker push ${registryUrl}:${git_commit_hash}"
+	//					  }
+						}
+					  }
+
+					}
+	//		stage('Deploy-Upgrade on K8s'){
+	//			steps{
+	//				echo "Deploy"
+	//				sh "ansible-playbook ${Workspace}/${image}/ansible/deploy.yaml --extra-vars registryUrl=${registryUrl} --extra-vars git_commit_hash=${git_commit_hash}"
+	//				}
 				}
-				
-			}
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
+
+}
+}
